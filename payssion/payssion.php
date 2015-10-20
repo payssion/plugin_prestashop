@@ -43,9 +43,11 @@ class Payssion extends PaymentModule
 		if (!parent::install()
 				OR !Configuration::updateValue(self::PAYSSION_API_KEY, '')
 				OR !Configuration::updateValue(self::PAYSSION_SECRET_KEY, '')
-				OR !Configuration::updateValue(self::PAYSSION_PM_OPTIONS, 'cashu|onecard|paysafecard|sofort|qiwi|boleto_br')
+				OR !Configuration::updateValue(self::PAYSSION_PM_OPTIONS, 
+						'cashu|onecard|paysafecard|sofort|qiwi|boleto_br|molpay|maybank2u_my|dragonpay_ph')
 				OR !Configuration::updateValue(self::PAYSSION_PM_SURCHARGE, '0|0|0|0|0|0')
-				OR !Configuration::updateValue(self::PAYSSION_PM_NAME, 'CashU|OneCard|Paysafecard|SOFORT|Qiwi|Boleto')
+				OR !Configuration::updateValue(self::PAYSSION_PM_NAME, 
+						'CashU|OneCard|Paysafecard|SOFORT|Qiwi|Boleto|MOLPay|Maybank2u|Dragonpay')
 				OR !Configuration::updateValue(self::PAYSSION_PM_ENABLED, '')
 				OR !$this->registerHook('payment')
 				OR !$this->registerHook('paymentReturn'))
@@ -270,7 +272,8 @@ class Payssion extends PaymentModule
 		$lang = new Language((int)($cookie->id_lang));
 		
 		$reqParams = array();
-			
+		$reqParams['source'] = 'prestashop';
+		
 		/* About the merchant */
 		$reqParams['api_key'] = $apiKey;
 

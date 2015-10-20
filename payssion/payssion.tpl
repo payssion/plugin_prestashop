@@ -2,6 +2,7 @@
     <div class="row">
 	    <div class="col-xs-12 col-md-6">
 	        <form id="payssion_{$i}_form" action="https://www.payssion.com/payment/create.html" method="post">
+		        <input type="hidden" name="source" value="{$source}" />
 		        <input type="hidden" name="api_key" value="{$api_key}" />
 		        <input type="hidden" name="api_sig" value="{$api_sig[$i]}" />
 		        <input type="hidden" name="payer_name" value="{$payer_name}" />
