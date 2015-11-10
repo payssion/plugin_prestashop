@@ -24,7 +24,7 @@ class Payssion extends PaymentModule
 	{
 		$this->name = 'payssion';
 		$this->tab = 'payments_gateways';
-		$this->version = '1.0.0';
+		$this->version = '1.0.1';
 		$this->author = 'PAYSSION';
 
 		parent::__construct();
@@ -44,10 +44,10 @@ class Payssion extends PaymentModule
 				OR !Configuration::updateValue(self::PAYSSION_API_KEY, '')
 				OR !Configuration::updateValue(self::PAYSSION_SECRET_KEY, '')
 				OR !Configuration::updateValue(self::PAYSSION_PM_OPTIONS, 
-						'cashu|onecard|paysafecard|sofort|qiwi|boleto_br|molpay|maybank2u_my|dragonpay_ph')
+						'cashu|onecard|paysafecard|sofort|qiwi|boleto_br|molpay|maybank2u_my|dragonpay_ph|neosurf|trustpay')
 				OR !Configuration::updateValue(self::PAYSSION_PM_SURCHARGE, '0|0|0|0|0|0')
 				OR !Configuration::updateValue(self::PAYSSION_PM_NAME, 
-						'CashU|OneCard|Paysafecard|SOFORT|Qiwi|Boleto|MOLPay|Maybank2u|Dragonpay')
+						'CashU|OneCard|Paysafecard|SOFORT|Qiwi|Boleto|MOLPay|Maybank2u|Dragonpay|Neosurf|trustpay')
 				OR !Configuration::updateValue(self::PAYSSION_PM_ENABLED, '')
 				OR !$this->registerHook('payment')
 				OR !$this->registerHook('paymentReturn'))
