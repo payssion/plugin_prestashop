@@ -36,6 +36,10 @@ class Payssion extends PaymentModule
 
 		//if (Configuration::get('MB_PAY_TO_EMAIL') == 'testmerchant@moneybookers.com')
 		//	$this->warning = $this->l('You are currently using the default Moneybookers e-mail address, please use your own e-mail address.');
+		
+		/* Backward compatibility */
+		if (_PS_VERSION_ < '1.5')
+			require(_PS_MODULE_DIR_.$this->name.'/backward_compatibility/backward.php');
 	}
 	
 	public function install()
