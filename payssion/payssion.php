@@ -313,7 +313,12 @@ class Payssion extends PaymentModule
 		$pmName = $pmName ? explode('|', $pmName) : array();
 		$apiSig = array();
 		for ($i = 0; $i < count($pmOptions); $i++) {
-			$surcharge[$pmOptions[$i]] = $surcharge[$i];
+			if (isset($surcharge[$i])) {
+				$surcharge[$pmOptions[$i]] = $surcharge[$i];
+			} else {
+				$surcharge[$pmOptions[$i]] = 0;
+			}
+			
 			$pmName[$pmOptions[$i]] = $pmName[$i];
 			$apiSig[$pmOptions[$i]] = $this->generateSignature($reqParams, $pmOptions[$i], $secretKey);
 		}
