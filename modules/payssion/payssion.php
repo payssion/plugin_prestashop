@@ -1,8 +1,5 @@
 <?php
 
-if (!defined('_PS_VERSION_'))
-	exit;
-
 class Payssion extends PaymentModule
 {
 	const PAYSSION_API_KEY = "PAYSSION_API_KEY";
@@ -48,7 +45,7 @@ class Payssion extends PaymentModule
 				OR !Configuration::updateValue(self::PAYSSION_API_KEY, '')
 				OR !Configuration::updateValue(self::PAYSSION_SECRET_KEY, '')
 				OR !Configuration::updateValue(self::PAYSSION_PM_OPTIONS, 
-						'bitcoin|cashu|onecard|paysafecard|openbucks|sofort|poli_nz|poli_au|webmoney|qiwi|yamoney|yamoneyac|sberbank_ru|alfaclick_ru|neosurf|trustpay|dineromail_ar|boleto_br|bancodobrasil_br|bradesco_br|caixa_br|itau_br|elo_br|hipercard_br|visa_br|mastercard_br|dinersclub_br|americanexpress_br|banamex_mx|bancomer_mx|oxx_mx|santander_mx|redpagos_uy|bancochile_cl|redcompra_cl|molpay|maybank2u_my|dragonpay_ph')
+						'bitcoin|cashu|onecard|paysafecard|openbucks|sofort|poli_nz|poli_au|webmoney|qiwi|yamoney|yamoneyac|sberbank_ru|alfaclick_ru|neosurf|trustpay|dineromail_ar|boleto_br|bancodobrasil_br|bradesco_br|caixa_br|itau_br|elo_br|hipercard_br|visa_br|mastercard_br|dinersclub_br|americanexpress_br|banamex_mx|bancomer_mx|oxxo_mx|santander_mx|redpagos_uy|bancochile_cl|redcompra_cl|molpay|maybank2u_my|dragonpay_ph')
 				OR !Configuration::updateValue(self::PAYSSION_PM_SURCHARGE, '0|0|0|0|0|0')
 				OR !Configuration::updateValue(self::PAYSSION_PM_NAME, 
 						'Bitcoin|CashU|OneCard|Paysafecard|Openbucks|SOFORT|New Zealand bank transfer|Australia bank transfer|WebMoney|Qiwi|Yandex.Money|Bank Card (Yandex.Money)|Sberbank|Alfa-Click|Neosurf|trustpay|Dinero Mail - Efectivo Argentinal|Boleto|Banco do Brasil|Bradesco|Caixa Brazil|Itau|Elo Brazil|Hipercard Brazil|Visa Brazil|Mastercard Brazil|Dinersclub Brazil|American Express Brazil|Banamex|Bancomer(BBVA)|Oxxo|Santander Mexico|Redpagos|Banco de Chile|RedCompra|MOLPay|Maybank2u|Dragonpay')

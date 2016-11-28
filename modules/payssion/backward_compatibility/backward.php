@@ -34,7 +34,7 @@ if (!in_array('Context', get_declared_classes()))
 	require_once(dirname(__FILE__).'/Context.php');
 
 // Get out if the Display (BWDisplay to avoid any conflict)) is already defined
-if (!in_array('BWDisplay', get_declared_classes()))
+if (_PS_VERSION_ >= '1.4' && !in_array('BWDisplay', get_declared_classes()))
 	require_once(dirname(__FILE__).'/Display.php');
 
 // If not under an object we don't have to set the context
