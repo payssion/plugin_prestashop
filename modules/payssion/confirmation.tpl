@@ -11,7 +11,7 @@
 		</p>
 	{else}
 		<p class="warning">
-			{l s='We noticed a problem with your order. If you think this is an error, you can contact our' mod='payssion'} 
+			{l s='Oops!!! Your payment has not been completed. If you have completed the payment successfully, you can contact our' mod='payssion'} 
 			<a href="{$link->getPageLink('contact', true)}">{l s='customer support' mod='payssion'}</a>.
 		</p>
 	{/if}
