@@ -63,16 +63,8 @@ class Payssion extends PaymentModule
 	 */
 	public function updatePaymentStatusConfiguration()
 	{
-		$pmName = Configuration::get(self::PAYSSION_PM_NAME);
-		$pmName = $pmName ? explode('|', $pmName) : array();
-		$pmEnabled = Configuration::get(self::PAYSSION_PM_ENABLED);
-		$pmEnabled = $pmEnabled ? explode('|', $pmEnabled) : array();
 		$statuses = array();
-		foreach ($pmEnabled as $key => $value) {
-			$pm = $pmName[$key];
-			$statuses["PS_OS_PAYSSION_$value"] = "Awaiting $pm payment";
-		}
-		
+		$statuses["PS_OS_PAYSSION_PENDING"] = "Awaiting payment";
 		//waiting payment status creation
 		$this->updatePaymentStatus($statuses, '#4169E1', '', false, false, '', false);
 		return true;
@@ -421,7 +413,7 @@ class Payssion extends PaymentModule
 							$order_status = (int)Configuration::get('PS_OS_PAYMENT');
 							break;
 						case 'pending':
-							$order_status = (int)Configuration::get("PS_OS_PAYSSION_$pm_id");
+							$order_status = (int)Configuration::get("PS_OS_PAYSSION_PENDING");
 							break;
 						default:
 							$order_status = (int)Configuration::get('PS_OS_ERROR');
