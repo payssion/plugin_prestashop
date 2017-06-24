@@ -11,8 +11,8 @@
 		</p>
 	{else}
 		<p class="warning">
-			{l s='Oops!!! Your payment has not been completed. If you have completed the payment successfully, you can contact our' mod='payssion'} 
-			<a href="{$link->getPageLink('contact', true)}">{l s='customer support' mod='payssion'}</a>.
+			{l s='It seems you have not completed the payment yet. Please note it may take time for us to confirm the payments if you pay via cash or offline payment methods. Please contact our' mod='payssion'} 
+			<a href="{$link->getPageLink('contact', true)}">{l s='customer support' mod='payssion'} if you have any questions.</a>.
 		</p>
 	{/if}
 {/if}
