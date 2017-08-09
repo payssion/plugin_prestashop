@@ -329,7 +329,7 @@ class Payssion extends PaymentModule
 			return ;
 	
 		global $smarty;
-		$smarty->assign('state', $params['state']);
+		$smarty->assign('state', $_GET['state']);
 		
 		return $this->display(__FILE__, 'confirmation.tpl');
 	}
