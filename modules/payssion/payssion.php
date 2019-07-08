@@ -441,7 +441,8 @@ class Payssion extends PaymentModule
 						echo "validateOrder";
 						$message ='Transaction ID: '.$payssion_id;
 						echo "order_status=$order_status;";
-						$this->validateOrder((int)$cart->id, (int)$order_status, (float)$order_amount, $pm_name, $message, array(), null, false, false);
+						$this->validateOrder((int)$cart->id, (int)$order_status, $order_amount, $pm_name, $message, 
+								array('transaction_id' => $payssion_id), null, true, false);
 					}
 				}
 			}
