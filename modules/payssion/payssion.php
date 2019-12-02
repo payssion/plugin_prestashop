@@ -45,10 +45,10 @@ class Payssion extends PaymentModule
 				OR !Configuration::updateValue(self::PAYSSION_API_KEY, '')
 				OR !Configuration::updateValue(self::PAYSSION_SECRET_KEY, '')
 				OR !Configuration::updateValue(self::PAYSSION_PM_OPTIONS, 
-						'bitcoin|cashu|onecard|paysafecard|openbucks|sofort|dotpay_pl|polipayment|webmoney|qiwi|yamoney|sberbank_ru|alfaclick_ru|neosurf|trustpay|dineromail_ar|boleto_br|bancodobrasil_br|bradesco_br|caixa_br|itau_br|elo_br|hipercard_br|visa_br|mastercard_br|dinersclub_br|americanexpress_br|banamex_mx|bancomer_mx|oxxo_mx|santander_mx|redpagos_uy|bancochile_cl|redcompra_cl|molpay|maybank2u_my|dragonpay_ph|alipay_cn|tenpay_cn|unionpay_cn')
+						'bitcoin|onecard|paysafecard|sofort|dotpay_pl|polipayment|webmoney|qiwi|yamoney|sberbank_ru|alfaclick_ru|neosurf|boleto_br|bancodobrasil_br|bradesco_br|caixa_br|itau_br|elo_br|hipercard_br|visa_br|mastercard_br|dinersclub_br|americanexpress_br|banamex_mx|bancomer_mx|oxxo_mx|santander_mx|redpagos_uy|bancochile_cl|redcompra_cl|maybank2u_my|dragonpay_ph|alipay_cn|tenpay_cn|unionpay_cn')
 				OR !Configuration::updateValue(self::PAYSSION_PM_SURCHARGE, '0|0|0|0|0|0')
 				OR !Configuration::updateValue(self::PAYSSION_PM_NAME, 
-						'Bitcoin|CashU|OneCard|Paysafecard|Openbucks|SOFORT|Dotpay|POLi|WebMoney|Qiwi|Yandex.Money|Sberbank|Alfa-Click|Neosurf|trustpay|Dinero Mail - Efectivo Argentinal|Boleto|Banco do Brasil|Bradesco|Caixa Brazil|Itau|Elo Brazil|Hipercard Brazil|Visa Brazil|Mastercard Brazil|Dinersclub Brazil|American Express Brazil|Banamex|Bancomer(BBVA)|Oxxo|Santander Mexico|Redpagos|Banco de Chile|RedCompra|MOLPay|Maybank2u|Dragonpay|Alipay|Tenpay|Unionpay')
+						'Bitcoin|OneCard|Paysafecard|SOFORT|Dotpay|POLi|WebMoney|Qiwi|Yandex.Money|Sberbank|Alfa-Click|Neosurf|Boleto|Banco do Brasil|Bradesco|Caixa Brazil|Itau|Elo Brazil|Hipercard Brazil|Visa Brazil|Mastercard Brazil|Dinersclub Brazil|American Express Brazil|Banamex|Bancomer(BBVA)|Oxxo|Santander Mexico|Redpagos|Banco de Chile|RedCompra|Maybank2u|Dragonpay|Alipay|Tenpay|Unionpay')
 				OR !Configuration::updateValue(self::PAYSSION_PM_ENABLED, '')
 				OR !$this->registerHook('payment')
 				OR !$this->registerHook('paymentReturn'))
@@ -235,7 +235,7 @@ class Payssion extends PaymentModule
 					$option = $pmOptions[$i];
 					$this->_html .= '<input type="checkbox" name="pm_option_'. $option .'" value="1"'.
 					                (in_array($option, $pmEnabled) ? ' checked="checked"' : '').
-					                ' /> <img src="'.__PS_BASE_URI__.'modules/payssion/images/pm/'.$option.'.png" alt="" style="vertical-align: middle;" /><br />';
+					                ' /> <img src="'.__PS_BASE_URI__.'modules/payssion/images/pm/'.$option.'.png" alt="" style="vertical-align: middle;max-width:100px;" /><br />';
 				}
 
 		$this->_html .= '<br /><div style="text-align:center;">
@@ -441,9 +441,8 @@ class Payssion extends PaymentModule
 						echo "validateOrder";
 						$message ='Transaction ID: '.$payssion_id;
 						echo "order_status=$order_status;";
-						$customer = new Customer($cart->id_customer);
 						$this->validateOrder((int)$cart->id, (int)$order_status, $order_amount, $pm_name, $message, 
-								array('transaction_id' => $payssion_id), null, false, $customer->secure_key);
+								array('transaction_id' => $payssion_id), null, true, false);
 					}
 				}
 			}
