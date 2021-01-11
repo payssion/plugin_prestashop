@@ -245,6 +245,90 @@ class Payssion extends PaymentModule
 		</form>';
 	}
 	
+	public function hookPaymentOptions($params)
+	{
+	    if (!$this->active) {
+	        return;
+	    }
+	    
+	    $apiKey = Configuration::get(self::PAYSSION_API_KEY);
+	    $secretKey = Configuration::get(self::PAYSSION_SECRET_KEY);
+	    if (empty($apiKey))
+	        return $this->l('Payssion error: (undefined api key)');
+	        if (empty($secretKey))
+	            return $this->l('Payssion error: (undefined secret key)');
+	            
+	    global $smarty;
+	    global $cookie;
+	    
+	    /* Load objects */
+	    $address = new Address((int)($params['cart']->id_address_delivery));
+	    $countryObj = new Country((int)($address->id_country), Configuration::get('PS_LANG_DEFAULT'));
+	    $customer = new Customer((int)($params['cart']->id_customer));
+	    $currency = new Currency((int)($params['cart']->id_currency));
+	    $lang = new Language((int)($cookie->id_lang));
+	    
+	    $reqParams = array();
+	    $reqParams['source'] = 'prestashop';
+	    
+	    /* About the merchant */
+	    $reqParams['api_key'] = $apiKey;
+	    
+	    /* About the customer */
+	    $reqParams['payer_email'] = $customer->email;
+	    $reqParams['payer_name'] = $address->firstname . $address->lastname;
+	    $reqParams['country'] = isset($this->_country[strtoupper($countryObj->iso_code)]) ? $this->_country[strtoupper($countryObj->iso_code)] : '';
+	    $reqParams['language'] = strtoupper($lang->iso_code);
+	    
+	    /* About the cart */
+	    $reqParams['track_id'] = $params['cart']->id;
+	    $reqParams['currency'] = $currency->iso_code;
+	    $reqParams['amount'] = number_format($params['cart']->getOrderTotal(), 2, '.', '');
+	    $reqParams['pm_id'] = '';
+	    $reqParams['description'] = Configuration::get('PS_SHOP_NAME');
+	    
+	    /* URLs */
+	    $baseUrl = (Configuration::get('PS_SSL_ENABLED') ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].__PS_BASE_URI__;
+	    $reqParams['success_url'] = $baseUrl .'index.php?controller=order-confirmation?id_cart='.(int)($params['cart']->id).'&id_module='.(int)($this->id).'&key='.$customer->secure_key;
+	    $reqParams['fail_url'] = $baseUrl;
+	    $reqParams['notify_url'] = $baseUrl .'modules/'.$this->name.'/notify.php';
+	    
+	    $pmEnabled = Configuration::get(self::PAYSSION_PM_ENABLED);
+	    $pmEnabled = $pmEnabled ? explode('|', $pmEnabled) : array();
+	    $reqParams['pm_enabled'] = $pmEnabled;
+	    
+	    $pmOptions = Configuration::get(self::PAYSSION_PM_OPTIONS);
+	    $pmOptions = $pmOptions ? explode('|', $pmOptions) : array();
+	    $surcharge = Configuration::get(self::PAYSSION_PM_SURCHARGE);
+	    $surcharge = $surcharge ? explode('|', $surcharge) : array();
+	    $pmName = Configuration::get(self::PAYSSION_PM_NAME);
+	    $pmName = $pmName ? explode('|', $pmName) : array();
+	    
+	    $inputs = [];
+	    foreach ($reqParams as $request_key => $request_value) {
+	        $inputs = [
+	            $request_key => [
+	                'name' => $request_key,
+	                'type' => 'hidden',
+	                'value' => $request_value,
+	            ]
+	        ];
+	    }
+	    $payment_options =[];
+	    for ($i = 0; $i < count($pmOptions); $i++) { 
+	        $externalOption = new PaymentOption();
+	        $externalOption->setCallToActionText($pmName[$i])
+	        ->setAction('https://www.payssion.com/payment/create.html')
+	        ->setInputs(array_merge($inputs, ['api_sig' => $this->generateSignature($reqParams, $pmOptions[$i], $secretKey)]))
+	        //->setAdditionalInformation($this->context->smarty->fetch('module:paymentexample/views/templates/front/payment_infos.tpl'))
+	        ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_. $this->name. '/images/pm/' . $pmOptions[$i] . '.png'));
+	        
+	        $payment_options[] = $externalOption;
+	    }
+	    
+	    return $payment_options;
+	}
+	
 	public function hookPayment($params)
 	{
 		$apiKey = Configuration::get(self::PAYSSION_API_KEY);

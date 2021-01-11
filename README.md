@@ -2,7 +2,6 @@ Payssion prestashop extension
 =================
 
 <h3>Getting Started</h3>
-This extension is for prestashop 1.5.5.x and below
 
 <h4>Automatic installation</h4>
 
