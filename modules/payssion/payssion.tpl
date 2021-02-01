@@ -5,12 +5,14 @@
 		        <input type="hidden" name="source" value="{$source}" />
 		        <input type="hidden" name="api_key" value="{$api_key}" />
 		        <input type="hidden" name="api_sig" value="{$api_sig[$i]}" />
+		        <input type="hidden" name="payer_email" value="{$payer_email}" />
 		        <input type="hidden" name="payer_name" value="{$payer_name}" />
 		        <input type="hidden" id="pm_id" name="pm_id" value="{$i}" />
 		        <input type="hidden" name="track_id" value="{$track_id}" />
 		        <input type="hidden" name="description" value="{$description}" />
 		        <input type="hidden" name="amount" value="{$amount}" />
 		        <input type="hidden" name="currency" value="{$currency}" />
+		        <input type="hidden" name="country" value="{$country}" />
 		        <input type="hidden" name="language" value="{$language}" />
 		        <input type="hidden" name="notify_url" value="{$notify_url}" />
 		        <input type="hidden" name="success_url" value="{$success_url}" />

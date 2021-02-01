@@ -31,9 +31,6 @@ class Payssion extends PaymentModule
 		$this->description = $this->l('Accepts payments via Payssion.');
 		$this->confirmUninstall = $this->l('Are you sure you want to delete your details ?');
 
-		//if (Configuration::get('MB_PAY_TO_EMAIL') == 'testmerchant@moneybookers.com')
-		//	$this->warning = $this->l('You are currently using the default Moneybookers e-mail address, please use your own e-mail address.');
-		
 		/* Backward compatibility */
 		if (_PS_VERSION_ < '1.5')
 			require(_PS_MODULE_DIR_.$this->name.'/backward_compatibility/backward.php');
@@ -45,10 +42,10 @@ class Payssion extends PaymentModule
 				OR !Configuration::updateValue(self::PAYSSION_API_KEY, '')
 				OR !Configuration::updateValue(self::PAYSSION_SECRET_KEY, '')
 				OR !Configuration::updateValue(self::PAYSSION_PM_OPTIONS, 
-						'bitcoin|onecard|paysafecard|sofort|dotpay_pl|polipayment|webmoney|qiwi|yamoney|sberbank_ru|alfaclick_ru|neosurf|boleto_br|bancodobrasil_br|bradesco_br|caixa_br|itau_br|elo_br|hipercard_br|visa_br|mastercard_br|dinersclub_br|americanexpress_br|banamex_mx|bancomer_mx|oxxo_mx|santander_mx|redpagos_uy|bancochile_cl|redcompra_cl|maybank2u_my|dragonpay_ph|alipay_cn|tenpay_cn|unionpay_cn')
+						'bitcoin|onecard|paysafecard|giropay_de|eps_at|bancontact_be|ideal_nl|mybank|multibanco_pt|paybybankapp_gb|trustly|payu_cz|dotpay_pl|sofort|polipayment|webmoney|qiwi|yamoney|sberbank_ru|alfaclick_ru|neosurf|boleto_br|bancodobrasil_br|bradesco_br|caixa_br|itau_br|elo_br|hipercard_br|visa_br|mastercard_br|dinersclub_br|americanexpress_br|banamex_mx|bancomer_mx|oxxo_mx|santander_mx|redpagos_uy|bancochile_cl|redcompra_cl|maybank2u_my|dragonpay_ph|alipay_cn|tenpay_cn|unionpay_cn')
 				OR !Configuration::updateValue(self::PAYSSION_PM_SURCHARGE, '0|0|0|0|0|0')
 				OR !Configuration::updateValue(self::PAYSSION_PM_NAME, 
-						'Bitcoin|OneCard|Paysafecard|SOFORT|Dotpay|POLi|WebMoney|Qiwi|Yandex.Money|Sberbank|Alfa-Click|Neosurf|Boleto|Banco do Brasil|Bradesco|Caixa Brazil|Itau|Elo Brazil|Hipercard Brazil|Visa Brazil|Mastercard Brazil|Dinersclub Brazil|American Express Brazil|Banamex|Bancomer(BBVA)|Oxxo|Santander Mexico|Redpagos|Banco de Chile|RedCompra|Maybank2u|Dragonpay|Alipay|Tenpay|Unionpay')
+						'Bitcoin|OneCard|Paysafecard|Giropay|EPS|Bancontact|iDeal|Mybank|Multibanco|Pay By Bank app|Trustly|PayU|Dotpay|SOFORT|POLi|WebMoney|Qiwi|Yandex.Money|Sberbank|Alfa-Click|Neosurf|Boleto|Banco do Brasil|Bradesco|Caixa Brazil|Itau|Elo Brazil|Hipercard Brazil|Visa Brazil|Mastercard Brazil|Dinersclub Brazil|American Express Brazil|Banamex|Bancomer(BBVA)|Oxxo|Santander Mexico|Redpagos|Banco de Chile|RedCompra|Maybank2u|Dragonpay|Alipay|Tenpay|Unionpay')
 				OR !Configuration::updateValue(self::PAYSSION_PM_ENABLED, '')
 				OR !$this->registerHook('payment')
 				OR !$this->registerHook('paymentReturn'))
@@ -262,7 +259,7 @@ class Payssion extends PaymentModule
 	    global $cookie;
 	    
 	    /* Load objects */
-	    $address = new Address((int)($params['cart']->id_address_delivery));
+	    $address = new Address((int)($params['cart']->id_address_invoice ?: $params['cart']->id_address_delivery));
 	    $countryObj = new Country((int)($address->id_country), Configuration::get('PS_LANG_DEFAULT'));
 	    $customer = new Customer((int)($params['cart']->id_customer));
 	    $currency = new Currency((int)($params['cart']->id_currency));
@@ -276,7 +273,7 @@ class Payssion extends PaymentModule
 	    
 	    /* About the customer */
 	    $reqParams['payer_email'] = $customer->email;
-	    $reqParams['payer_name'] = $address->firstname . $address->lastname;
+	    $reqParams['payer_name'] = $address->firstname . ' ' . $address->lastname;
 	    $reqParams['country'] = isset($this->_country[strtoupper($countryObj->iso_code)]) ? $this->_country[strtoupper($countryObj->iso_code)] : '';
 	    $reqParams['language'] = strtoupper($lang->iso_code);
 	    
@@ -316,17 +313,47 @@ class Payssion extends PaymentModule
 	    }
 	    $payment_options =[];
 	    for ($i = 0; $i < count($pmOptions); $i++) { 
+	        $pm_id = $pmOptions[$i];
+	        if (!$this->isAvailable($pm_id, $countryObj->iso_code)) {
+	            continue;
+	        }
+	        
 	        $externalOption = new PaymentOption();
 	        $externalOption->setCallToActionText($pmName[$i])
 	        ->setAction('https://www.payssion.com/payment/create.html')
-	        ->setInputs(array_merge($inputs, ['api_sig' => $this->generateSignature($reqParams, $pmOptions[$i], $secretKey)]))
+	        ->setInputs(array_merge($inputs, ['api_sig' => $this->generateSignature($reqParams, $pm_id, $secretKey)]))
 	        //->setAdditionalInformation($this->context->smarty->fetch('module:paymentexample/views/templates/front/payment_infos.tpl'))
-	        ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_. $this->name. '/images/pm/' . $pmOptions[$i] . '.png'));
+	        ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_. $this->name. '/images/pm/' . $pm_id . '.png'));
 	        
 	        $payment_options[] = $externalOption;
 	    }
 	    
 	    return $payment_options;
+	}
+	
+	protected function isAvailable($pm_id, $country) {
+	    $country_list = null;
+	    if ($country) {
+	        $suffix = $this->getPMSuffix($pm_id);
+	        if (!$suffix) {
+	            if ('sofort' == $pm_id) {
+	                $country_list = ['AT', 'CH', 'DE', 'ES', 'GB', 'IT', 'NL'];
+	            } elseif ('mybank' == $pm_id) {
+	                $country_list = ['IT'];
+	            } elseif ('trustly' == $pm_id) {
+	                $country_list = ['BE','CZ','DE','DK','EE','ES','FI','LT','LV','NL','NO','PL','SE','SK','GB'];
+	            }
+	        } else if ($suffix) {
+	            $country_list = [strtoupper($suffix)];
+	        }
+	    }
+	    
+	    return $country_list ? in_array($country, $country_list) : true;
+	}
+	
+	protected function getPMSuffix($pm_id) {
+	    $pos = strpos($pm_id, '_');
+	    return $pos ? substr($pm_id, $pos + 1) : null;
 	}
 	
 	public function hookPayment($params)
@@ -356,8 +383,8 @@ class Payssion extends PaymentModule
 
 		/* About the customer */
 		$reqParams['payer_email'] = $customer->email;
-		$reqParams['payer_name'] = $address->firstname . $address->lastname;
-		$reqParams['country'] = isset($this->_country[strtoupper($countryObj->iso_code)]) ? $this->_country[strtoupper($countryObj->iso_code)] : '';
+		$reqParams['payer_name'] = $address->firstname . ' ' . $address->lastname;
+		$reqParams['country'] = strtoupper($countryObj->iso_code);
 		$reqParams['language'] = strtoupper($lang->iso_code);
 		
 		/* About the cart */
@@ -372,11 +399,19 @@ class Payssion extends PaymentModule
 		$reqParams['success_url'] = $baseUrl .'index.php?controller=order-confirmation?id_cart='.(int)($params['cart']->id).'&id_module='.(int)($this->id).'&key='.$customer->secure_key;
 		$reqParams['fail_url'] = $baseUrl;
 		$reqParams['notify_url'] = $baseUrl .'modules/'.$this->name.'/notify.php';
-		
-		
+
 		$pmEnabled = Configuration::get(self::PAYSSION_PM_ENABLED);
 		$pmEnabled = $pmEnabled ? explode('|', $pmEnabled) : array();
-		$reqParams['pm_enabled'] = $pmEnabled;
+		$pm_available = [];
+		if (!empty($pmEnabled)) {
+		    foreach ($pmEnabled as $pm) {
+		        if ($this->isAvailable($pm, $countryObj->iso_code)) {
+		            $pm_available[] = $pm;
+		        }
+		    }
+		}
+
+		$reqParams['pm_enabled'] = $pm_available;
 		
 		$pmOptions = Configuration::get(self::PAYSSION_PM_OPTIONS);
 		$pmOptions = $pmOptions ? explode('|', $pmOptions) : array();
@@ -403,7 +438,7 @@ class Payssion extends PaymentModule
 		/* Assign settings to Smarty template */
 		$smarty->assign($reqParams);
 		
-		/* Display the MoneyBookers iframe */
+		/* Display the payssion iframe */
 		return $this->display(__FILE__, 'payssion.tpl');
 	}
 	
@@ -464,9 +499,14 @@ class Payssion extends PaymentModule
 			$order_amount = (float)($_POST['amount']);
 			$paid = (float)($_POST['amount']);
 			$currency = $_POST['currency'];
-			$trans_id = (int)($_POST['transaction_id']);
+			$trans_id = $_POST['transaction_id'];
 			
-			$this->updateOrder($cart_id, $order_amount, $currency, $pm_name, $pm_id, $state, $paid, $trans_id);
+			if (in_array($state, ['paid_more', 'paid_partial', 'completed', 'awaiting_confirm'])) {
+			    $this->updateOrder($cart_id, $order_amount, $currency, $pm_name, $pm_id, $state, $paid, $trans_id);
+			} else {
+			    echo "ignore state:$state";
+			}
+			
 		} else {
 			echo "failed to check api_sig";
 		}
@@ -493,14 +533,15 @@ class Payssion extends PaymentModule
 				{
 					$order_status = null;
 					switch ($payment_state) {
+					    case 'paid_more':
+					    case 'paid_partial':
 						case 'completed':
 							$order_status = (int)Configuration::get('PS_OS_PAYMENT');
 							break;
-						case 'pending':
+						case 'awaiting_confirm':
 							$order_status = (int)Configuration::get("PS_OS_PAYSSION_PENDING");
 							break;
 						default:
-							$order_status = (int)Configuration::get('PS_OS_ERROR');
 							break;
 
 					}
@@ -523,10 +564,10 @@ class Payssion extends PaymentModule
 					else
 					{
 						echo "validateOrder";
-						$message ='Transaction ID: '.$payssion_id;
 						echo "order_status=$order_status;";
-						$this->validateOrder((int)$cart->id, (int)$order_status, $order_amount, $pm_name, $message, 
-								array('transaction_id' => $payssion_id), null, true, false);
+						$customer = new Customer($cart->id_customer);
+						$this->validateOrder((int)$cart->id, (int)$order_status, $order_amount, $pm_name, null, 
+						    array('transaction_id' => $payssion_id), null, false, $customer->secure_key);
 					}
 				}
 			}
